@@ -1,0 +1,61 @@
+﻿@model MyBlog.web.Models.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<section class="hero-section text-center hero-section mb-5">
+    <div class="container">
+        <h1 class="display-3 fw-bold lh-1 mb-3">
+            ASP.NET MVC Blog
+        </h1>
+        <p class="lead display-5">This is my first experience with ASP.NET MVC framework</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6 d-flex mb-3">
+            @if (Model != null && Model.Tags.Any())
+            {
+                @foreach (var tag in @Model.Tags)
+                {
+                    <span class="badge bg-dark me-1">@tag.Name</span>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            @if (Model != null && Model.BlogPosts.Any())
+            {
+                @foreach (var blogPost in Model.BlogPosts)
+                {
+                    <div class="mb-5 bg-light box-shadow">
+                        <img src="@blogPost.FeaturedImageUrl" alt="@blogPost.Heading" class="mb-2 d-block img-fluid rounded-3"/>
+                        <div class="p-3">
+                            <h4 class="mb-4">@blogPost.Heading</h4>
+                            <p class="mb-4">
+                                Author: @blogPost.Author<br />
+                                Published: @blogPost.PublishedDate.ToShortDateString()
+                            </p>
+
+                            <p class="mb-4">
+                                @foreach (var tag in blogPost.Tags)
+                                {
+                                    <span class="badge bg-secondary me-1">@tag.Name</span>
+                                }
+                            </p>
+
+                            <p class="mb-4">@blogPost.ShortDescription</p>
+                            <a class="btn btn-dark" asp-area="" asp-controller="Blogs" asp-action="Index" asp-route-slug="@blogPost.Slug">Read More</a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
