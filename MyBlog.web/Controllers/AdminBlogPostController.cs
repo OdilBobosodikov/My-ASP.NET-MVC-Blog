@@ -68,9 +68,36 @@ namespace MyBlog.web.Controllers
             return RedirectToAction("List");
         }
 
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(string? searchQuery,
+                                              string? sortBy,
+                                              string? sortDirection,
+                                              int pageSize = 5,
+                                              int pageNumber = 1)
         {
-            var posts = await blogPostRepository.GetAllAsync();
+
+            var totalRecords = await blogPostRepository.CountAsync();
+            var totalPages = Math.Ceiling((decimal)totalRecords / pageSize);
+
+            if (pageNumber > totalPages)
+            {
+                pageNumber--;
+            }
+
+            if (pageNumber < 1)
+            {
+                pageNumber++;
+            }
+
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDirection = sortDirection;
+            ViewBag.PageSize = pageSize;
+            ViewBag.PageNumber = pageNumber;
+
+            var posts = await blogPostRepository.GetAllAsync(searchQuery, sortBy, sortDirection, pageNumber, pageSize);
+
+
 
             return View(posts);
         }

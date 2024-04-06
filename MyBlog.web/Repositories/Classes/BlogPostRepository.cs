@@ -20,6 +20,11 @@ namespace MyBlog.web.Repositories.Classes
             return blogPost;
         }
 
+        public async Task<int> CountAsync()
+        {
+            return await blogDbContext.BlogPosts.CountAsync();
+        }
+
         public async Task<BlogPost?> DeleteAsync(Guid id)
         {
            var existingBlog = await blogDbContext.BlogPosts.FindAsync(id);
@@ -35,9 +40,29 @@ namespace MyBlog.web.Repositories.Classes
 
         }
 
-        public async Task<IEnumerable<BlogPost>> GetAllAsync()
+        public async Task<IEnumerable<BlogPost>> GetAllAsync(string? searchQuery, string? sortBy, string? sortDirection, int pageNumber = 1, int pageSize = 100)
         {
-            return await blogDbContext.BlogPosts.Include(x=>x.Tags).ToListAsync();
+            var query = blogDbContext.BlogPosts.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query.Where(x => x.Heading.Contains(searchQuery));
+            }
+
+            var skipResults = (pageNumber - 1) * pageSize;
+            query = query.Skip(skipResults).Take(pageSize);
+
+            if (!string.IsNullOrWhiteSpace(sortBy)) 
+            {
+                var isDesc = string.Equals(sortDirection, "Desc", StringComparison.OrdinalIgnoreCase);
+
+                if (string.Equals(sortBy, "Heading", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = isDesc ? query.OrderByDescending(x => x.Heading) : query.OrderBy(x => x.Heading);
+                }
+            }
+
+            return await query.Include(x => x.Tags).ToListAsync();
         }
 
         public async Task<BlogPost?> GetAsync(Guid id)
