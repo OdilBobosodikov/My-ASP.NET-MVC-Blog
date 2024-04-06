@@ -19,15 +19,22 @@ namespace MyBlog.web.Controllers
             this.tagRepository = tagRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? tagName)
         {
-            var posts = await blogPostRepository.GetAllAsync();   
+            var posts = await blogPostRepository.GetAllAsync();
+            ViewBag.SelectedTagName = tagName;
+
+            if (tagName != null)
+            {
+                posts = await blogPostRepository.GetAllByTagName(tagName);
+            }
+
             var tags = await tagRepository.GetAllAsync();
 
             HomeViewModel model = new() 
             {
                 BlogPosts = posts,
-                Tags = tags
+                Tags = tags,
             }; 
 
             return View(model);

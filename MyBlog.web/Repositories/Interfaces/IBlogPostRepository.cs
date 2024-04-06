@@ -16,5 +16,6 @@ namespace MyBlog.web.Repositories.Interfaces
         Task<BlogPost?> DeleteAsync(Guid id);
 
         Task<int> CountAsync();
+        Task<IEnumerable<BlogPost>> GetAllByTagName(string? tagName);
     }
 }

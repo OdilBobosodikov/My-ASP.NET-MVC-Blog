@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Home Page";
+    var selectedTagName = ViewBag.SelectedTagName;
 }
 
 <section class="hero-section text-center hero-section mb-5">
@@ -18,9 +19,24 @@
         <div class="col-6 d-flex mb-3">
             @if (Model != null && Model.Tags.Any())
             {
+                @if (selectedTagName == null)
+                {
+                    <h3><a asp-area="" asp-controller="Home" asp-action="Index" asp-route-tagName=""><span class="badge bg-dark me-1">All</span></a></h3>
+                }
+                else
+                {
+                    <h4><a asp-area="" asp-controller="Home" asp-action="Index" asp-route-tagName=""><span class="badge bg-dark me-1">All</span></a></h4>
+                }
                 @foreach (var tag in @Model.Tags)
                 {
-                    <span class="badge bg-dark me-1">@tag.Name</span>
+                    @if (tag.Name == selectedTagName)
+                    {
+                        <h3><span class="badge bg-dark me-1">@tag.Name</span></h3>
+                    }
+                    else
+                    {
+                        <h4><a asp-area="" asp-controller="Home" asp-action="Index" asp-route-tagName="@tag.Name"><span class="badge bg-dark me-1">@tag.Name</span></a></h4>
+                    }
                 }
             }
         </div>
