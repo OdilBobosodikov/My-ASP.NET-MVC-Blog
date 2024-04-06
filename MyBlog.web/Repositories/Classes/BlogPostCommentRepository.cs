@@ -23,7 +23,12 @@ namespace MyBlog.web.Repositories.Classes
 
         public async Task<IEnumerable<BlogPostComment>> GetAllByIdAsync(Guid blogPostId)
         {
-            return await myBlogDbContext.BlogPostComments.Where(x => x.BlogPostId == blogPostId).ToListAsync();
+            var query = myBlogDbContext.BlogPostComments
+                .Where(x => x.BlogPostId == blogPostId)
+                .AsQueryable()
+                .OrderByDescending(x => x.DateAdded);
+
+            return await query.ToListAsync();
         }
     }
 }
