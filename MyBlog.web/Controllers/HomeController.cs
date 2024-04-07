@@ -3,6 +3,7 @@ using MyBlog.web.Models;
 using MyBlog.web.Models.ViewModels;
 using MyBlog.web.Repositories.Interfaces;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace MyBlog.web.Controllers
 {
@@ -19,16 +20,32 @@ namespace MyBlog.web.Controllers
             this.tagRepository = tagRepository;
         }
 
-        public async Task<IActionResult> Index(string? tagName)
-        {
-            var posts = await blogPostRepository.GetAllAsync();
-            ViewBag.SelectedTagName = tagName;
+        [HttpGet]
+        public async Task<IActionResult> Index(string? searchQuery, string? tagName, int pageNumber = 1, int pageSize = 5)
+        {    
+            var totalRecords = await blogPostRepository.CountAsync(tagName);
+            var totalPages = Math.Ceiling((decimal)totalRecords / pageSize);
 
-            if (tagName != null)
+            if (pageNumber > totalPages)
             {
-                posts = await blogPostRepository.GetAllByTagName(tagName);
+                pageNumber--;
             }
 
+            if (pageNumber < 1)
+            {
+                pageNumber++;
+            }
+
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.PageSize = pageSize;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.SelectedTagName = tagName;
+
+            var posts = await blogPostRepository.GetAllAsync(searchQuery: searchQuery,
+                                                 pageNumber: pageNumber,
+                                                 pageSize: pageSize,
+                                                 tagName: tagName);
             var tags = await tagRepository.GetAllAsync();
 
             HomeViewModel model = new() 

@@ -8,14 +8,14 @@ namespace MyBlog.web.Repositories.Interfaces
                                                 string? sortBy = null,
                                                 string? sortDirection = null,
                                                 int pageNumber = 1,
-                                                int pageSize = 100);
+                                                int pageSize = 100,
+                                                string? tagName = null);
         Task<BlogPost?> GetAsync(Guid id);
         Task<BlogPost?> GetBySlugAsync(string slug);
         Task<BlogPost> AddAsync(BlogPost blogPost);
         Task<BlogPost?> UpdateAsync(BlogPost blogPost);
         Task<BlogPost?> DeleteAsync(Guid id);
 
-        Task<int> CountAsync();
-        Task<IEnumerable<BlogPost>> GetAllByTagName(string? tagName);
+        Task<int> CountAsync(string? tagName = null);
     }
 }

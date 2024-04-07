@@ -20,8 +20,12 @@ namespace MyBlog.web.Repositories.Classes
             return blogPost;
         }
 
-        public async Task<int> CountAsync()
+        public async Task<int> CountAsync(string? tagName = null)
         {
+            if (tagName != null)
+            {
+                return await GetQueryableByTagName(tagName).CountAsync();
+            }
             return await blogDbContext.BlogPosts.CountAsync();
         }
 
@@ -40,13 +44,21 @@ namespace MyBlog.web.Repositories.Classes
 
         }
 
-        public async Task<IEnumerable<BlogPost>> GetAllAsync(string? searchQuery, string? sortBy, string? sortDirection, int pageNumber = 1, int pageSize = 100)
+        public async Task<IEnumerable<BlogPost>> GetAllAsync(string? searchQuery = null,
+                                                             string? sortBy = null,
+                                                             string? sortDirection = null,
+                                                             int pageNumber = 1,
+                                                             int pageSize = 100,
+                                                             string? tagName = null)
         {
-            var query = blogDbContext.BlogPosts.AsQueryable();
+            var query = GetQueryableByTagName(tagName);
 
             if (!string.IsNullOrWhiteSpace(searchQuery))
             {
-                query = query.Where(x => x.Heading.Contains(searchQuery));
+                query = query.Where(x => x.Heading.Contains(searchQuery) ||
+                                         x.Author.Contains(searchQuery) ||
+                                         x.Title.Contains(searchQuery) ||
+                                         x.ShortDescription.Contains(searchQuery));
             }
 
             var skipResults = (pageNumber - 1) * pageSize;
@@ -65,15 +77,19 @@ namespace MyBlog.web.Repositories.Classes
             return await query.Include(x => x.Tags).ToListAsync();
         }
 
-        public async Task<IEnumerable<BlogPost>> GetAllByTagName(string? tagName)
+        private IQueryable<BlogPost> GetQueryableByTagName(string? tagName)
         {
-            var tag = await blogDbContext.Tags.FirstOrDefaultAsync(x => x.Name == tagName);
-            if (tag != null)
+            var query = blogDbContext.BlogPosts.AsQueryable();
+
+            if (!string.IsNullOrEmpty(tagName))
             {
-                return blogDbContext.BlogPosts.Where(x => x.Tags.Contains(tag));
+                var tag = blogDbContext.Tags.FirstOrDefault(x => x.Name == tagName);
+                if (tag != null)
+                {
+                    query = query.Where(x => x.Tags.Contains(tag));
+                }
             }
-            return null;
-            
+            return query;
         }
 
         public async Task<BlogPost?> GetAsync(Guid id)
